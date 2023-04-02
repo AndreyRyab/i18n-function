@@ -9,7 +9,7 @@ The function takes a number of parameters and returns a string. It can:
 - internationalize lists
 - internationalize relative time
 
-### To checkout in a browser
+### Run in browser
 ```
 git clone git@github.com:AndreyRyab/i18n-function.git
 cd i18n-function
