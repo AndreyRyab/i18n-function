@@ -1,15 +1,17 @@
+import * as params from './mocks';
+
 export function setupOutputText(element) {
   let outputText = '';
 
   const setOutput = (text) => {
     outputText = text;
-    element.innerHTML = `${outputText}`
+    element.innerHTML = `${outputText}`;
   };
 
-  setOutput('start text');
+  setOutput(getI18nText(params));
 };
 
-const getI18nText = function ({ stringTokens, variables, translations, locale }) {
+const getI18nText = function ({ stringTokens, variables = null, translations = null, locale = null }) {
   let i18nText = '';
 
   const getPluralKey = (number) => {
@@ -21,7 +23,7 @@ const getI18nText = function ({ stringTokens, variables, translations, locale })
       few: [2,3,4].includes(lastDigit) || Math.trunc(number) !== number,
       many: lastDigit > 4,
       other: true,
-    }
+    };
 
     return Object.entries(plurals).find(([_, value]) => value)[0];
   };
@@ -46,6 +48,14 @@ const getI18nText = function ({ stringTokens, variables, translations, locale })
     },
 
     '@number': (params) => {
+      let value = 0;
+      
+      if (params[0].startsWith('$')) {
+        value = variables[params[0].slice(1)];
+      } else {
+        value = params[0];
+      }
+
       const formatter = new Intl.NumberFormat(
         locale,
         {
@@ -57,7 +67,7 @@ const getI18nText = function ({ stringTokens, variables, translations, locale })
         },
       );
 
-      return formatter.format(params[0]);
+      return formatter.format(value);
     },
 
     '@plural': (params) => {
@@ -67,6 +77,7 @@ const getI18nText = function ({ stringTokens, variables, translations, locale })
       const pluralKey = getPluralKey(number);
 
       const text = translations[locale][key][pluralKey];
+      
       return `${number}${text}`;
     },
 
@@ -107,7 +118,7 @@ const getI18nText = function ({ stringTokens, variables, translations, locale })
     },
   };
   
-  stringTokens.forEach(token => {
+  stringTokens?.forEach(token => {
     if (Array.isArray(token)) {
       i18nText = i18nText.concat(funcs[token[0]](token.slice(1,)));
 
@@ -125,5 +136,5 @@ const getI18nText = function ({ stringTokens, variables, translations, locale })
     i18nText = i18nText.concat(token);
   });
  
-  return i18nText;
+  return i18nText || 'start text';
 };
